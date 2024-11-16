@@ -42,6 +42,7 @@ The project now includes a web-based user interface powered by Gradio, making it
    - Your data remains on your computer
 <br/>
 <br/>
+
 ![Army Roster Manager Demo](https://raw.githubusercontent.com/MushroomFleet/WH40K-Collection-Roster/main/demo-images/example-tracker-display.png)
 
 ## Setup Instructions
