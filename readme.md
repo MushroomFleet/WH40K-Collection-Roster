@@ -1,6 +1,7 @@
 # Warhammer 40K Army Roster Manager
 
 A command-line tool for managing Warhammer 40K army rosters using .cat files. Compatible with 10th Edition Battlescribe/Battleforge catalogue files.
+<br/>
 ![Army Roster Manager Demo](https://raw.githubusercontent.com/MushroomFleet/WH40K-Collection-Roster/main/demo-images/example-tracker-display.png)
 
 
