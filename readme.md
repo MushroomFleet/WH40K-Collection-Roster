@@ -1,9 +1,48 @@
 # Warhammer 40K Army Roster Manager
 
-A command-line tool for managing Warhammer 40K army rosters using .cat files. Compatible with 10th Edition Battlescribe/Battleforge catalogue files.
+A tool for managing Warhammer 40K army rosters using .cat files. Compatible with 10th Edition Battlescribe/Battleforge catalogue files. Now featuring both command-line and web-based interfaces.
+
+## Web Interface Instructions
+
+The project now includes a web-based user interface powered by Gradio, making it easier to manage your army rosters.
+
+1. Launch the Web Interface:
+   ```
+   Double-click run_web.bat
+   ```
+   This will open the interface in your default web browser.
+
+2. Using the Web Interface:
+
+   a. Catalogue Management Tab:
+   - Click "Scan for Catalogues" to find available .cat files
+   - Select a catalogue from the dropdown
+   - Click "Load Selected Catalogue" to load the units
+   - You can preview available units in this tab
+
+   b. Roster Management Tab:
+   - Click "Scan for Rosters" to find saved rosters
+   - Select and load an existing roster, or start fresh
+   - Use the "Select Unit to Add" dropdown to choose units
+   - Set quantity and click "Add Unit" to add to your roster
+   - Remove units using the removal dropdown
+   - Save your roster by entering a filename and clicking "Save Roster"
+
+3. Features:
+   - Real-time point calculations
+   - Unit quantity management
+   - Easy unit selection via dropdowns
+   - Automatic roster updates
+   - Local-only operation for security
+   - Automatic file type handling (.cat and .json)
+
+4. Security Note:
+   - The web interface runs locally only (127.0.0.1)
+   - No external connections are made
+   - Your data remains on your computer
+<br/>
 <br/>
 ![Army Roster Manager Demo](https://raw.githubusercontent.com/MushroomFleet/WH40K-Collection-Roster/main/demo-images/example-tracker-display.png)
-
 
 ## Setup Instructions
 
