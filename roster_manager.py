@@ -63,8 +63,8 @@ class RosterManager:
             print(f"{Fore.RED}Error loading roster: {e}")
             return False
 
-    def save_roster(self, filename: str = None) -> bool:
-        """Save current roster to file"""
+    def save_roster(self, filename: str = None, allow_overwrite: bool = False) -> bool:
+        """Save current roster to file with overwrite control"""
         if not filename:
             filename = self.active_roster_name
             
@@ -73,14 +73,19 @@ class RosterManager:
             return False
             
         try:
-            # Check if file exists
+            # Check if file exists and get overwrite permission
             if os.path.exists(filename):
-                response = get_user_input(
-                    f"{Fore.YELLOW}File {filename} already exists. Overwrite? (y/n): "
-                ).lower()
-                if response != 'y':
-                    print(f"{Fore.YELLOW}Save cancelled")
-                    return False
+                if not allow_overwrite:
+                    # For command line interface
+                    if not hasattr(self, '_gui_mode'):
+                        response = get_user_input(
+                            f"{Fore.YELLOW}File {filename} already exists. Overwrite? (y/n): "
+                        ).lower()
+                        if response != 'y':
+                            print(f"{Fore.YELLOW}Save cancelled")
+                            return False
+                    else:
+                        return False
             
             with open(filename, 'w') as f:
                 json.dump(self.active_roster, f, indent=2)

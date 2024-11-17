@@ -46,17 +46,25 @@ class GradioArmyManager:
         return unit_list, f"Loaded {len(unit_list)} units from {catalogue_name}"
         
     def load_roster(self, roster_name):
-        """Load selected roster"""
+        """Load selected roster and update removal dropdown"""
         if not roster_name:
-            return "Please select a roster", ""
+            return "Please select a roster", "", gr.Dropdown(choices=[])
             
         success = self.roster_manager.load_roster(roster_name)
         if not success:
-            return f"Failed to load roster: {roster_name}", ""
+            return f"Failed to load roster: {roster_name}", "", gr.Dropdown(choices=[])
             
         roster, _ = self.roster_manager.get_active_roster()
         roster_text = self.format_roster(roster)
-        return f"Loaded roster: {roster_name}", roster_text
+        
+        # Create formatted unit list for removal dropdown
+        removable_units = []
+        if roster:
+            for unit, details in roster.items():
+                points = details["points_per_unit"] * details["quantity"]
+                removable_units.append(f"{unit} (x{details['quantity']}, {points} pts)")
+                
+        return f"Loaded roster: {roster_name}", roster_text, gr.Dropdown(choices=removable_units)
         
     def format_roster(self, roster):
         """Format roster for display"""
@@ -77,31 +85,36 @@ class GradioArmyManager:
         return "\n".join(lines)
         
     def add_unit(self, unit_selection, quantity):
-        """Add selected unit to roster"""
+        """Add selected unit to roster and update removal dropdown"""
         if not unit_selection:
-            return "Please select a unit", ""
+            return "Please select a unit", "", gr.Dropdown(choices=[])
             
         if not quantity or quantity < 1:
-            return "Please enter a valid quantity", ""
+            return "Please enter a valid quantity", "", gr.Dropdown(choices=[])
         
         try:
             # Handle unit_selection whether it's a list or string
             if isinstance(unit_selection, list):
-                unit_selection = unit_selection[0]  # Take first selection if multiple
+                unit_selection = unit_selection[0]
             
             # Extract unit name and points from selection string
-            # Format: "Unit Name (XX pts)"
             unit_name = unit_selection.split(" (")[0]
             points = int(unit_selection.split("(")[1].split(" ")[0])
             
             roster, _ = self.roster_manager.get_active_roster()
             add_unit_to_roster(roster, unit_name, points, quantity)
             
-            return f"Added {quantity}x {unit_name}", self.format_roster(roster)
+            # Create updated removal dropdown choices
+            removable_units = []
+            for unit, details in roster.items():
+                unit_points = details["points_per_unit"] * details["quantity"]
+                removable_units.append(f"{unit} (x{details['quantity']}, {unit_points} pts)")
+            
+            return f"Added {quantity}x {unit_name}", self.format_roster(roster), gr.Dropdown(choices=removable_units)
         except Exception as e:
-            return f"Error adding unit: {str(e)}", ""
+            return f"Error adding unit: {str(e)}", "", gr.Dropdown(choices=[])
         
-    def save_current_roster(self, filename):
+    def save_current_roster(self, filename, allow_overwrite=False):
         """Save current roster to file"""
         if not filename:
             return "Please enter a filename"
@@ -109,31 +122,44 @@ class GradioArmyManager:
         if not filename.endswith('.json'):
             filename += '.json'
             
-        success = self.roster_manager.save_roster(filename)
+        if os.path.exists(filename) and not allow_overwrite:
+            return f"File {filename} already exists. Enable 'Allow Overwrite' to save."
+            
+        success = self.roster_manager.save_roster(filename, allow_overwrite)
         if success:
             return f"Saved roster to {filename}"
         return "Failed to save roster"
 
-    def remove_unit(self, unit_selection, quantity=1):
+    def remove_unit(self, unit_selection):
         """Remove unit from roster"""
         if not unit_selection:
-            return "Please select a unit to remove", ""
+            return "Please select a unit to remove", "", gr.Dropdown(choices=[])
             
         try:
             roster, _ = self.roster_manager.get_active_roster()
             if not roster:
-                return "Roster is empty", ""
+                return "Roster is empty", "", gr.Dropdown(choices=[])
                 
-            # Find unit in roster
-            units = list(roster.keys())
-            if unit_selection not in units:
-                return f"Unit {unit_selection} not found in roster", ""
+            # Extract unit name from the formatted string
+            # Format is "Unit Name (xQ, P pts)"
+            unit_name = unit_selection.split(" (x")[0]
                 
-            # Remove unit
-            remove_unit_from_roster(roster, units.index(unit_selection) + 1)
-            return f"Removed {quantity}x {unit_selection}", self.format_roster(roster)
+            if unit_name not in roster:
+                return f"Unit {unit_name} not found in roster", "", gr.Dropdown(choices=list(roster.keys()))
+                
+            # Remove the unit
+            current_qty = roster[unit_name]["quantity"]
+            del roster[unit_name]
+            
+            # Create updated removal dropdown choices
+            removable_units = []
+            for unit, details in roster.items():
+                points = details["points_per_unit"] * details["quantity"]
+                removable_units.append(f"{unit} (x{details['quantity']}, {points} pts)")
+            
+            return f"Removed {current_qty}x {unit_name}", self.format_roster(roster), gr.Dropdown(choices=removable_units)
         except Exception as e:
-            return f"Error removing unit: {str(e)}", ""
+            return f"Error removing unit: {str(e)}", "", gr.Dropdown(choices=[])
 
 def create_interface():
     manager = GradioArmyManager()
@@ -160,13 +186,12 @@ def create_interface():
                 outputs=[cat_dropdown, cat_status]
             )
             
-            # Update both unit lists when loading catalogue
             load_cat_btn.click(
                 fn=manager.load_catalogue,
                 inputs=cat_dropdown,
                 outputs=[unit_list_preview, cat_status]
             ).then(
-                lambda x: x,  # Pass through the unit list
+                lambda x: x,
                 inputs=[unit_list_preview],
                 outputs=[available_units]
             )
@@ -205,8 +230,13 @@ def create_interface():
                 )
                 add_unit_btn = gr.Button("Add Unit")
                 
+            # Save Section
             with gr.Row():
                 save_name = gr.Textbox(label="Save Filename")
+                allow_overwrite = gr.Checkbox(
+                    label="Allow Overwrite",
+                    value=False
+                )
                 save_btn = gr.Button("Save Roster")
                 save_status = gr.Textbox(label="Save Status", interactive=False)
 
@@ -214,17 +244,19 @@ def create_interface():
             with gr.Row():
                 remove_unit_dropdown = gr.Dropdown(
                     label="Select Unit to Remove",
+                    choices=[],
                     multiselect=False
                 )
                 remove_btn = gr.Button("Remove Unit")
                 
-            # Update add_unit_dropdown when catalogue is loaded
+            # Update available units when catalogue is loaded
             available_units.change(
                 lambda x: gr.Dropdown(choices=x),
                 inputs=[available_units],
                 outputs=[add_unit_dropdown]
             )
                 
+            # Roster management event handlers
             scan_roster_btn.click(
                 fn=manager.scan_rosters,
                 outputs=[roster_dropdown, roster_status]
@@ -232,26 +264,27 @@ def create_interface():
             
             load_roster_btn.click(
                 fn=manager.load_roster,
-                inputs=roster_dropdown,
-                outputs=[roster_status, roster_display]
+                inputs=[roster_dropdown],
+                outputs=[roster_status, roster_display, remove_unit_dropdown]
             )
             
+            # Unit management event handlers
             add_unit_btn.click(
                 fn=manager.add_unit,
                 inputs=[add_unit_dropdown, quantity_input],
-                outputs=[roster_status, roster_display]
+                outputs=[roster_status, roster_display, remove_unit_dropdown]
             )
             
             save_btn.click(
                 fn=manager.save_current_roster,
-                inputs=save_name,
+                inputs=[save_name, allow_overwrite],
                 outputs=save_status
             )
 
             remove_btn.click(
                 fn=manager.remove_unit,
-                inputs=[remove_unit_dropdown, quantity_input],
-                outputs=[roster_status, roster_display]
+                inputs=[remove_unit_dropdown],
+                outputs=[roster_status, roster_display, remove_unit_dropdown]
             )
             
     return interface
@@ -259,8 +292,8 @@ def create_interface():
 if __name__ == "__main__":
     interface = create_interface()
     interface.launch(
-        server_name="127.0.0.1",  # Only allow local connections
-        share=False,              # Disable sharing/tunneling
-        show_error=True,          # Show detailed errors for debugging
-        inbrowser=True           # Auto-open in default browser
+        server_name="127.0.0.1",
+        share=False,
+        show_error=True,
+        inbrowser=True
     )

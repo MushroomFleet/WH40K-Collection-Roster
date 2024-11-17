@@ -2,6 +2,7 @@
 
 A tool for managing Warhammer 40K army rosters using .cat files. Compatible with 10th Edition Battlescribe/Battleforge catalogue files. Now featuring both command-line and web-based interfaces.
 <br/>
+
 ![Army Roster Manager Demo](https://raw.githubusercontent.com/MushroomFleet/WH40K-Collection-Roster/main/demo-images/Gradio-Version.png)
 
 
@@ -22,14 +23,17 @@ The project now includes a web-based user interface powered by Gradio, making it
    - Select a catalogue from the dropdown
    - Click "Load Selected Catalogue" to load the units
    - You can preview available units in this tab
+   - Units are displayed with their point costs
 
    b. Roster Management Tab:
    - Click "Scan for Rosters" to find saved rosters
    - Select and load an existing roster, or start fresh
    - Use the "Select Unit to Add" dropdown to choose units
    - Set quantity and click "Add Unit" to add to your roster
-   - Remove units using the removal dropdown
+   - Use the "Select Unit to Remove" dropdown to choose units to remove
+   - Remove units using the "Remove Unit" button
    - Save your roster by entering a filename and clicking "Save Roster"
+   - Enable "Allow Overwrite" checkbox to update existing rosters
 
 3. Features:
    - Real-time point calculations
@@ -38,6 +42,9 @@ The project now includes a web-based user interface powered by Gradio, making it
    - Automatic roster updates
    - Local-only operation for security
    - Automatic file type handling (.cat and .json)
+   - User-friendly unit removal via dropdown
+   - Detailed unit information in dropdowns (including quantities and points)
+   - Overwrite protection for saved rosters
 
 4. Security Note:
    - The web interface runs locally only (127.0.0.1)
@@ -64,7 +71,8 @@ The project now includes a web-based user interface powered by Gradio, making it
 3. Running the Program:
    ```
    a. Place your .cat files in the same directory as the program
-   b. Double-click run.bat
+   b. Double-click run_web.bat for the web interface
+   c. Double-click run.bat for the command-line interface
    ```
 
 ## Catalogue Files (.cat)
@@ -78,11 +86,11 @@ https://github.com/BSData/wh40k-10e/tree/main (AUTHOR)
 ## Quick Start Guide
 
 1. Place .cat files in the program directory
-2. Run the program using run.bat
+2. Run the program using run_web.bat for the web interface
 3. The program automatically scans for:
    - .cat files (faction catalogues)
    - .json files (saved rosters)
-4. Select options from the menu to manage your army roster
+4. Use the interface tabs to manage catalogues and rosters
 
 ## Main Features
 
@@ -90,8 +98,9 @@ https://github.com/BSData/wh40k-10e/tree/main (AUTHOR)
 - Automatic scanning for .cat files
 - Load multiple catalogues simultaneously
 - Switch between different faction catalogues
-- View all loaded catalogues
+- View all loaded catalogues with point costs
 - Individual catalogue loading option
+- Unit preview functionality
 
 ### Roster Management
 - Automatic scanning for saved rosters
@@ -99,42 +108,35 @@ https://github.com/BSData/wh40k-10e/tree/main (AUTHOR)
 - Load existing rosters
 - Save rosters with overwrite protection
 - View all available rosters with points values
-- Add/remove units with quantities
+- Add units with quantities via dropdown
+- Remove units via dropdown selection
 - Track total roster points
+- Automatic roster updates
 
 ### Unit Management
 - List all available units from current catalogue
+- Display unit point costs
 - Add units with quantities
-- Remove units or reduce quantities
+- Remove units through dropdown selection
 - Automatic points calculation
-- Track wargear options
+- Track unit quantities
+- Format unit display with points and quantities
 
-## Menu System
-
-1. Main Menu:
-   - Catalogue Management
-   - Roster Management
-   - List Available Units
-   - Add Unit
-   - Remove Unit
-   - View Current Roster
-
-2. Catalogue Management:
-   - Scan and Load All Catalogues
-   - Load Single Catalogue
-   - List Loaded Catalogues
-   - Switch Active Catalogue
-
-3. Roster Management:
-   - Scan for Roster Files
-   - List Available Rosters
-   - Load Roster
-   - Save Current Roster
-   - Create New Roster
+### Interface Features
+- Web-based Gradio interface
+- Command-line interface option
+- Two main tabs: Catalogue and Roster Management
+- Dropdown-based unit selection
+- Real-time roster updates
+- Clear status messages
+- Point cost tracking
+- Quantity management
+- File overwrite protection
 
 ## Files Structure
 
-- `main.py` - Main program file
+- `main.py` - Command-line interface
+- `gradio_interface.py` - Web interface
 - `catalogue_manager.py` - Catalogue file management
 - `roster_manager.py` - Roster file management
 - `input_handlers.py` - User input handling
@@ -144,21 +146,25 @@ https://github.com/BSData/wh40k-10e/tree/main (AUTHOR)
 - `units.py` - Unit handling functions
 - `requirements.txt` - Python package requirements
 - `install.bat` - Installation script
-- `run.bat` - Program launcher
+- `run.bat` - Command-line launcher
+- `run_web.bat` - Web interface launcher
 
 ## Display Features
-- Color-coded interface for better readability
+- Color-coded command-line interface
+- Clean web interface design
 - Active catalogue and roster always displayed
-- Points values shown for all rosters
+- Points values shown for all rosters and units
 - Unit quantities and points in roster view
 - Clear status messages and error handling
+- Dropdown-based unit selection and removal
 
 ## Saved Data
 - Rosters are saved as .json files
 - Automatic backup before overwriting
 - Points values stored with units
 - Unit quantities tracked
-- Wargear options preserved
+- Roster total points calculated
+- File overwrite protection
 
 ## Troubleshooting
 
@@ -181,6 +187,7 @@ https://github.com/BSData/wh40k-10e/tree/main (AUTHOR)
    - Check console for error messages
    - Verify all required files present
    - Confirm .cat file compatibility
+   - Check web browser compatibility
 
 ## Support
 
@@ -190,6 +197,7 @@ For issues:
 3. Confirm Python version
 4. Check file permissions
 5. Validate .cat file format
+6. Ensure web browser is up to date
 
 ## Future Development
 - Unit wargear selection
@@ -199,6 +207,9 @@ For issues:
 - Detachment handling
 - Points limit validation
 - Battalion structure support
+- Enhanced user interface features
+- Batch unit operations
+- Advanced filtering options
 
 ## Contributing
 Contributions welcome! Please feel free to submit pull requests.
@@ -210,6 +221,7 @@ Contributions welcome! Please feel free to submit pull requests.
 - Created for Warhammer 40K 10th Edition
 - Compatible with Battlescribe/Battleforge .cat format
 - Thanks to the community for testing and feedback
+- Built with Gradio for web interface
 
 ---
 Last Updated: November 2024
